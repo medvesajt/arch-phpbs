@@ -2,8 +2,9 @@
 ### PHP Building system for all PHP versions packages from 5.3 to 8.2
 The program is entirely Lamskoy's work and merit. I modified it for myself to the following:
 
-- limited package number, the extensions are in the main package
-- 
+- limited package number, the modules are in the main package
+- by default, I do not compile embed, phpdbg, litespeed sapi, but the option remains
+- pecl and pear binaries are in one package
 - package names are prefixed with moly-
 - the installation path is /op/moly/phpxx
 
