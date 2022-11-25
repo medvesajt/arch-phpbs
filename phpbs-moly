@@ -1874,21 +1874,31 @@ package____PREFIX___php___PHPBASE___-pear___SUFFIX___() {
 
     cp "${srcdir}/php-${pkgver}/pear/install-pear-nozlib.phar" "pear/install-pear-nozlib.phar"
 
+    if((_phpbase == 74)); then
+        pear_dir="${_prefix/\//}/share/pear"
+    else
+        pear_dir="${_prefix}/share/pear"
+    fi
+
     INSTALL_ROOT="${pkgdir}/" ./sapi/cli/php -n \
         -d extension=modules/xml.so \
         -d extension=modules/phar.so \
-        -d date.timezone=UTC -d memory_limit=64M -d short_open_tag=0 -d safe_mode=0 \
-        -d 'error_reporting=E_ALL&~E_DEPRECATED' -d detect_unicode=0 "pear/install-pear-nozlib.phar" \
+        -d date.timezone=UTC -d memory_limit=-1 -d short_open_tag=0 -d open_basedir= -d safe_mode=0 \
+        -d 'error_reporting=E_ALL&~E_DEPRECATED' -d detect_unicode=0 "pear/install-pear-nozlib.phar" \ 
         --php      "${_prefix}/bin/php" \
         --bin      "${_prefix}/bin" \
         --ext      "${_prefix}/lib/modules" \
         --man      "${_prefix}/share/man" \
-        --dir      "${_prefix}/share/pear" \
+        --dir      "${pear_dir}" \
         --data     "${_prefix}/share/pear/data" \
         --doc      "${_prefix}/share/pear/doc" \
         --test     "${_prefix}/share/pear/test" \
         --www      "${_prefix}/share/pear/htdocs" \
         --config   "${_prefix}/share/pear/cfg" \
+        --cache      "/var/lib/${pkgbase}/pear/cache" \
+        --download   "/var/lib/${pkgbase}/pear/download" \
+        --metadata   "/var/lib/${pkgbase}/pear/metadata" \
+        --debug \
         --force
     # fix pear.conf with unserialize
     # first arg: path to pear.conf
@@ -1906,14 +1916,16 @@ package____PREFIX___php___PHPBASE___-pear___SUFFIX___() {
         sed "s|PHP=php|PHP=\"${_prefix}/bin/php\"|g; s|\"/usr/bin/php\"|\"${_prefix}/bin/php\"|g; s| -n | |g" \
             -i "${pkgdir}${_prefix}/bin/${i}"
         
-        #if [[ "$i" == "pecl" ]]; then
-        #    echo "Moving ${pkgdir}${_prefix}bin/${i} => ${srcdir}/${pkgbase}-pecl-bin/"
-        #    mkdir -p "${srcdir}/${pkgbase}-pecl-bin/"
-        #    mv "${pkgdir}/usr/bin/pecl" "${srcdir}/${pkgbase}-pecl-bin/"
-        #else
-        #    echo "Moving ${pkgdir}/usr/bin/${i} => ${pkgdir}/usr/bin/${_target}"
-        #    mv "${pkgdir}/usr/bin/${i}" "${pkgdir}/usr/bin/${_target}"
-        #fi
+        : '
+        if [[ "$i" == "pecl" ]]; then
+            echo "Moving ${pkgdir}${_prefix}bin/${i} => ${srcdir}/${pkgbase}-pecl-bin/"
+            mkdir -p "${srcdir}/${pkgbase}-pecl-bin/"
+            mv "${pkgdir}/usr/bin/pecl" "${srcdir}/${pkgbase}-pecl-bin/"
+        else
+            echo "Moving ${pkgdir}/usr/bin/${i} => ${pkgdir}/usr/bin/${_target}"
+            mv "${pkgdir}/usr/bin/${i}" "${pkgdir}/usr/bin/${_target}"
+        fi
+        '
     done
 }
 # PEAR end

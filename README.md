@@ -6,7 +6,7 @@ The program is entirely Lamskoy's work and merit. I modified it for myself to th
 - by default, I do not compile embed, phpdbg, litespeed sapi, but the option remains
 - pecl and pear binaries are in one package
 - package names are prefixed with moly-
-- the installation path is /op/moly/phpxx
+- the installation path is /opt/moly/phpxx
 
 #### How to install it? 
 ```
