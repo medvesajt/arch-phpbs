@@ -1652,7 +1652,7 @@ package____PREFIX___php___PHPBASE______SUFFIX___() {
     popd
     pushd build-cli
     if (( ! _build_ini_per_sapi )); then
-        backup=("${_build_sapi_ini_cli}/php.ini")
+        backup=("${_build_sapi_ini_cli/\//}/php.ini")
         install -d -m755 "${pkgdir}/${_build_sapi_ini_cli}"
         install -D -m644 "../php-${pkgver}/php.ini-production" "${pkgdir}/${_build_sapi_ini_cli}/php.ini"
 
@@ -1688,7 +1688,7 @@ package____PREFIX___php___PHPBASE___-cli___SUFFIX___() {
     make -j1 INSTALL_ROOT="${pkgdir}" install-pharcmd
 
     if ((_build_ini_per_sapi)); then
-        backup=("${_build_sapi_ini_cli}/php.ini")
+        backup=("${_build_sapi_ini_cli/\//}/php.ini")
         install -d -m755 "${pkgdir}/${_build_sapi_ini_cli}"
         install -D -m644 "../php-${pkgver}/php.ini-production" "${pkgdir}/${_build_sapi_ini_cli}/php.ini"
     fi
@@ -1711,7 +1711,7 @@ package____PREFIX___php___PHPBASE___-cgi___SUFFIX___() {
     fi
     if ((_build_ini_per_sapi)); then
         install -D -m644 "../php-${pkgver}/php.ini-production" "${pkgdir}/${_build_sapi_ini_cgi}/php.ini"
-        backup=("${_build_sapi_ini_cgi}/php.ini")
+        backup=("${_build_sapi_ini_cgi/\//}/php.ini")
     fi
     case "${_phpbase}" in
         53 | 54)
@@ -1737,7 +1737,7 @@ package____PREFIX___php___PHPBASE___-apache___SUFFIX___() {
     depends+=("${_sapi_depends[@]}")
     depends+=('libxcrypt');
     depends+=('ncurses');
-    backup=("${_build_apache_cfg}/${_apache_module_conf}")
+    backup=("${_build_apache_cfg/\//}/${_apache_module_conf}")
     echo "# End of LoadModule in httpd.conf - see ArchWiki Apache HTTP Server"
     echo "LoadModule ${_build_mod_php_module} modules/lib${pkgbase}.so"
     echo "AddHandler ${_build_php_script_name} .php"
@@ -1746,7 +1746,7 @@ package____PREFIX___php___PHPBASE___-apache___SUFFIX___() {
 
     pushd "build-${_sapi}"
     if ((_build_ini_per_sapi)); then
-        backup+=("${_build_sapi_ini_apache}/php.ini")
+        backup+=("${_build_sapi_ini_apache/\//}/php.ini")
         install -d -m755 "${pkgdir}/${_build_sapi_ini_apache}"
         install -D -m644 "../php-${pkgver}/php.ini-production" "${pkgdir}/${_build_sapi_ini_apache}/php.ini"
     fi
@@ -1770,9 +1770,9 @@ package____PREFIX___php___PHPBASE___-fpm___SUFFIX___() {
     pkgdesc="FastCGI Process Manager for ${pkgbase}"
     depends=("${pkgbase}=${pkgver}" 'systemd-libs' 'acl')
     depends+=("${_sapi_depends[@]}")
-    backup=("${_build_sapi_ini_fpm}/php-fpm.conf")
+    backup=("${_build_sapi_ini_fpm/\//}/php-fpm.conf")
     if ((_phpbase >= 70)); then
-        backup+=("${_build_sapi_ini_fpm}/php-fpm.d/www.conf")
+        backup+=("${_build_sapi_ini_fpm/\//}/php-fpm.d/www.conf")
     fi
     options=('!emptydirs')
     if ((_build_ini_per_sapi || _build_per_sapi)); then
@@ -1781,7 +1781,7 @@ package____PREFIX___php___PHPBASE___-fpm___SUFFIX___() {
         pushd "build-cli"
     fi
     if ((_build_ini_per_sapi)); then
-        backup+=("${_build_sapi_ini_fpm}/php.ini")
+        backup+=("${_build_sapi_ini_fpm/\//}/php.ini")
         install -d -m755 "${pkgdir}/${_build_sapi_ini_fpm}/"
         install -D -m644 "../php-${pkgver}/php.ini-production" "${pkgdir}/${_build_sapi_ini_fpm}/php.ini"
     fi
@@ -1808,7 +1808,7 @@ package____PREFIX___php___PHPBASE___-embed___SUFFIX___() {
     install -d -m755 "${pkgdir}/${_build_sapi_ini_embed}"
     if ((_build_ini_per_sapi)); then
         install -D -m644 "../php-${pkgver}/php.ini-production" "${pkgdir}/${_build_sapi_ini_embed}/php.ini"
-        backup=("${_build_sapi_ini_embed}/php.ini")
+        backup=("${_build_sapi_ini_embed/\//}/php.ini")
     fi
     make -j1 INSTALL_ROOT="${pkgdir}" PHP_SAPI=embed install-sapi
     mv "${pkgdir}/usr/lib/libphp${_suffix_so}.so" "${pkgdir}/usr/lib/lib${pkgbase}.so"
@@ -1830,7 +1830,7 @@ package____PREFIX___php___PHPBASE___-phpdbg___SUFFIX___() {
         pushd "build-cli"
     fi
     if ((_build_ini_per_sapi)); then
-        backup=("${_build_sapi_ini_phpdbg}/php.ini")
+        backup=("${_build_sapi_ini_phpdbg/\//}/php.ini")
         install -d -m755 "${pkgdir}/${_build_sapi_ini_phpdbg}"
         install -D -m644 "../php-${pkgver}/php.ini-production" "${pkgdir}/${_build_sapi_ini_phpdbg}/php.ini"
     fi
@@ -1852,7 +1852,7 @@ package____PREFIX___php___PHPBASE___-litespeed___SUFFIX___() {
     fi
     if ((_build_ini_per_sapi)); then
         install -D -m644 "../php-${pkgver}/php.ini-production" "${pkgdir}/${_build_sapi_ini_cgi}/php.ini"
-        backup=("${_build_sapi_ini_cgi}/php.ini")
+        backup=("${_build_sapi_ini_cgi/\//}/php.ini")
     fi
     case "${_phpbase}" in
         *)
