@@ -12,14 +12,15 @@ _phpbs_set_vars() {
     _phpbase="$1"
     _suffix="$2"
     _phpbs_release=4
-
+    _pkg_custom_source=""
     ###########################################################################
     # Versions defintions
     ###########################################################################
     case "$_phpbase" in
-        82) pkgver=8.2.3  ; pkgrel=1 ;;
-        81) pkgver=8.1.16  ; pkgrel=1 ;;
-        80) pkgver=8.0.28 ; pkgrel=1 ;;
+        83) pkgver=8.3.0   ; pkgrel=1 ;;
+        82) pkgver=8.2.13  ; pkgrel=1 ;;
+        81) pkgver=8.1.25  ; pkgrel=1 ;;
+        80) pkgver=8.0.30 ; pkgrel=1 ;;
         74) pkgver=7.4.33 ; pkgrel=$((_phpbs_release)) ;;
         73) pkgver=7.3.33 ; pkgrel=$((6 + _phpbs_release)) ;;
         72) pkgver=7.2.34 ; pkgrel=$((10 + _phpbs_release)) ;;
@@ -54,6 +55,7 @@ _phpbs_set_vars() {
     _phpextensions_fpm=''
     # Magic comes here
     _php_major_minor=$(echo "$pkgver" | grep -Eo '([0-9]+\.[0-9]+)')
+    _php_full=$(echo "$pkgver" | grep -Eo '([0-9]+\.[0-9]+\.[0-9]+)')
 
     ###########################################################################
     # Extensions priority. Lower number = higher priority
@@ -285,13 +287,19 @@ _phpbs_set_vars() {
         "php-makefile-patcher.php"
         "php-apache.conf"
     )
-    if ((_phpbase >= 53 && _phpbase <= 54)); then
+    if [[ "${_pkg_custom_source}" != "" ]]; then
+        source+=("${_pkg_custom_source}")
+    elif ((_phpbase >= 53 && _phpbase <= 54)); then
         source+=("https://php.net/distributions/php-\${pkgver}.tar.bz2")
     else
         source+=("https://php.net/distributions/php-\${pkgver}.tar.xz")
     fi
+
     if ((_build_with_custom_icu)); then
         source+=('https://github.com/unicode-org/icu/releases/download/release-${_pkgver_icu}/icu4c-${_pkgver_icu/-/_}-src.tgz')
+    fi
+    if ((_phpbase <= 82)); then
+        _patches+=("php-libxml.patch")
     fi
     if ((_phpbase >= 71 && _phpbase <= 73)); then
         _patches+=("php71-phar-names.patch")
@@ -310,7 +318,8 @@ _phpbs_set_vars() {
     if ((_build_openssl_v10_patch && _phpbase <= 54)); then
         _patches+=("openssl-sslv3.patch")
     fi
-    if ((_phpbase <= 80)); then
+
+    if ((_phpbase >= 50 && _phpbase <= 73)); then
         _patches+=("openssl-sslv3-consts.patch")
     fi
     if ((_phpbase >= 50 && _phpbase <= 55)); then
@@ -507,7 +516,7 @@ _phpbs_set_vars() {
     _make_dependencies_enchant=('enchant' 'libvoikko' 'hspell' 'hunspell' 'nuspell' 'aspell')
     _make_dependencies_curl=('curl')
     _make_dependencies_odbc=('unixodbc')
-    _make_dependencies_dba=('db')
+    _make_dependencies_dba=('db5.3')
     _make_dependencies_gd=('gd')
     _make_dependencies_ffi=('libffi')
     _make_dependencies_xsl=('libxslt')
@@ -618,7 +627,7 @@ _phpbs_set_vars() {
                         fi
                         makedepends+=('e2fsprogs')
                         if ((_build_forced_openssl_11)); then
-                            _ext_depends_ftp+=('openssl-1.1');
+                            makedepends+=('openssl-1.1');
                         elif ((_build_openssl_v10_patch)); then
                             makedepends+=('openssl-1.0')
                         else
@@ -730,7 +739,7 @@ _phpbs_set_vars() {
                             _phpextensions+=" --with-lmdb=/usr "
                             makedepends+=('lmdb')
                         fi
-                        _ext_depends_dba=( 'db')
+                        _ext_depends_dba=( 'db5.3')
                         if ((_build_uses_lmdb)); then
                             _ext_depends_dba+=('lmdb')
                         fi
@@ -1118,7 +1127,7 @@ _phpbs_process_package() {
         fi
         _phpbs_info_message "Building binary package from ${newbuildfile} for ${package_name}"
         echo makepkg "${_phpbs_build_flags}" -Lsfc -p "${newbuildfile}"
-        echo "${_phpbs_build_flags} -Lsf -p ${newbuildfile}" | BUILDDIR="${builddir}" xargs makepkg
+        echo "${_phpbs_build_flags} -Lsfc -p ${newbuildfile}" | BUILDDIR="${builddir}" xargs makepkg
         if [[ $? -eq 0 ]];
             then rm -rf "${builddir}" "${newbuildfile}";
         else
@@ -1140,7 +1149,7 @@ _phpbs_join() {
 }
 
 _phpbs_main() {
-    local _phpbs_packages_8=(82 81 80)
+    local _phpbs_packages_8=(83 82 81 80)
     local _phpbs_packages_7=(74 73 72 71 70)
     local _phpbs_packages_5=(56 55 54 53)
     local _phpbs_all_packages=(${_phpbs_packages_8[@]} ${_phpbs_packages_7[@]} ${_phpbs_packages_5[@]})
@@ -1224,13 +1233,13 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
             shift;
             ;;
         all)
-            _phpbs_selected_packages+=(82 81 80)
+            _phpbs_selected_packages+=(83 82 81 80)
             _phpbs_selected_packages+=(74 73 72 71 70)
             _phpbs_selected_packages+=(56 55 54 53)
             shift
             ;;
         php8)
-            _phpbs_selected_packages+=(82 81 80)
+            _phpbs_selected_packages+=(83 82 81 80)
             shift
             ;;
         php7)
@@ -1364,6 +1373,8 @@ _build_sapi() {
 # BUILD them all
 ################################################################################
 build() {
+    export CFLAGS="${CFLAGS} -fPIC"
+    export CXXFLAGS="${CXXFLAGS} -fPIC"
     export EXTENSION_DIR="${_prefix}/lib/modules"
     if ((_build_openssl_v10_patch)); then
         export PHP_OPENSSL_DIR="/usr/lib/openssl-1.0"
@@ -1532,6 +1543,8 @@ build() {
 }
 
 check() {
+    export CFLAGS="${CFLAGS} -fPIC"
+    export CXXFLAGS="${CXXFLAGS} -fPIC"
     pushd "build-cli"
     # Check if sendmail was configured correctly (FS#47600)
     export REPORT_EXIT_STATUS=1
