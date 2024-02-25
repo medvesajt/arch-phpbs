@@ -1636,7 +1636,7 @@ package____PREFIX___php___PHPBASE______SUFFIX___() {
         pushd "${_build_icu_src_dir}"
         make DESTDIR="${pkgdir}" install
         popd
-        pushd "${pkgdir}{$_prefix}/lib/icu${_pkgver_icu}"
+        pushd "${pkgdir}${_prefix}/lib/icu${_pkgver_icu}"
         rm -rf bin include share
         popd
     fi
@@ -1650,7 +1650,7 @@ package____PREFIX___php___PHPBASE______SUFFIX___() {
     pushd "build-cli"
     make -j1 INSTALL_ROOT=${pkgdir} install-{modules,build,headers,programs}
     # Cleanup for CGI"
-    rm -rf "${pkgdir}{$_prefix}/bin/${pkgbase}-cgi"
+    rm -rf "${pkgdir}${_prefix}/bin/${pkgbase}-cgi"
     popd
 
     pushd "${pkgdir}${_prefix}/lib/modules/"
