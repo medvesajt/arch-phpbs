@@ -30,6 +30,7 @@ _phpbs_set_vars() {
         55) pkgver=5.5.38 ; pkgrel=$((10 + _phpbs_release)) ;;
         54) pkgver=5.4.45 ; pkgrel=$((4 + _phpbs_release)) ;;
         53) pkgver=5.3.29 ; pkgrel=$((14 + _phpbs_release)) ;;
+        52) pkgver=5.2.17 ; pkgrel=$((1 + _phpbs_release)) ;;
         *)
             _phpbs_error_message "No such PHP version defined: ${_phpbase}!"
             return 1;
@@ -291,7 +292,7 @@ _phpbs_set_vars() {
     )
     if [[ "${_pkg_custom_source}" != "" ]]; then
         source+=("${_pkg_custom_source}")
-    elif ((_phpbase >= 53 && _phpbase <= 54)); then
+    elif ((_phpbase >= 52 && _phpbase <= 54)); then
         source+=("https://php.net/distributions/php-\${pkgver}.tar.bz2")
     else
         source+=("https://php.net/distributions/php-\${pkgver}.tar.xz")
@@ -1635,7 +1636,7 @@ package____PREFIX___php___PHPBASE______SUFFIX___() {
         pushd "${_build_icu_src_dir}"
         make DESTDIR="${pkgdir}" install
         popd
-        pushd "${pkgdir}/usr/lib/${pkgbase}/icu${_pkgver_icu}"
+        pushd "${pkgdir}{$_prefix}/lib/icu${_pkgver_icu}"
         rm -rf bin include share
         popd
     fi
@@ -1649,7 +1650,7 @@ package____PREFIX___php___PHPBASE______SUFFIX___() {
     pushd "build-cli"
     make -j1 INSTALL_ROOT=${pkgdir} install-{modules,build,headers,programs}
     # Cleanup for CGI"
-    rm -rf "${pkgdir}/usr/bin/${pkgbase}-cgi"
+    rm -rf "${pkgdir}{$_prefix}/bin/${pkgbase}-cgi"
     popd
 
     pushd "${pkgdir}${_prefix}/lib/modules/"
